@@ -1,5 +1,5 @@
-﻿using CompanyName.MyMeetings.BuildingBlocks.Infrastructure.Outbox;
-
+﻿using System.Threading.Tasks;
+using CompanyName.MyMeetings.BuildingBlocks.Application.Outbox;
 namespace CompanyName.MyMeetings.Modules.UserAccess.Infrastructure.Outbox
 {
     public class OutboxAccessor : IOutbox
@@ -14,6 +14,11 @@ namespace CompanyName.MyMeetings.Modules.UserAccess.Infrastructure.Outbox
         public void Add(OutboxMessage message)
         {
             _userAccessContext.OutboxMessages.Add(message);
+        }
+
+        public Task Save()
+        {
+            return Task.CompletedTask; // Save is done automatically using EF Core Change Tracking mechanism during SaveChanges.
         }
     }
 }

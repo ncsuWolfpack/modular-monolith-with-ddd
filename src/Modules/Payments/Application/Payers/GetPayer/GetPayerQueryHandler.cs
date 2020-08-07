@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using CompanyName.MyMeetings.BuildingBlocks.Infrastructure;
+using CompanyName.MyMeetings.BuildingBlocks.Application.Data;
 using CompanyName.MyMeetings.Modules.Payments.Application.Configuration.Queries;
 using Dapper;
 
@@ -26,7 +26,7 @@ namespace CompanyName.MyMeetings.Modules.Payments.Application.Payers.GetPayer
                                "[Payer].[FirstName], " +
                                "[Payer].[LastName], " +
                                "[Payer].[Name] " +
-                               "FROM [payments].[v_Payers] AS [Payer] " +
+                               "FROM [payments].[Payers] AS [Payer] " +
                                "WHERE [Payer].[Id] = @PayerId";
 
             return await connection.QuerySingleAsync<PayerDto>(sql, new

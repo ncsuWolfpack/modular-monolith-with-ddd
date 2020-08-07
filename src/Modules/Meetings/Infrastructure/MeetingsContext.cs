@@ -1,13 +1,16 @@
-﻿using CompanyName.MyMeetings.BuildingBlocks.Infrastructure.InternalCommands;
-using CompanyName.MyMeetings.BuildingBlocks.Infrastructure.Outbox;
+﻿using CompanyName.MyMeetings.BuildingBlocks.Application.Outbox;
+using CompanyName.MyMeetings.BuildingBlocks.Infrastructure.InternalCommands;
+using CompanyName.MyMeetings.Modules.Meetings.Domain.MeetingComments;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.MeetingGroupProposals;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.MeetingGroups;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.Meetings;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.Members;
+using CompanyName.MyMeetings.Modules.Meetings.Domain.Members.MemberSubscriptions;
 using CompanyName.MyMeetings.Modules.Meetings.Infrastructure.Domain.MeetingGroupProposals;
 using CompanyName.MyMeetings.Modules.Meetings.Infrastructure.Domain.MeetingGroups;
 using CompanyName.MyMeetings.Modules.Meetings.Infrastructure.Domain.Meetings;
 using CompanyName.MyMeetings.Modules.Meetings.Infrastructure.Domain.Members;
+using CompanyName.MyMeetings.Modules.Meetings.Infrastructure.Domain.Members.MemberSubscriptions;
 using CompanyName.MyMeetings.Modules.Meetings.Infrastructure.InternalCommands;
 using CompanyName.MyMeetings.Modules.Meetings.Infrastructure.Outbox;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +27,12 @@ namespace CompanyName.MyMeetings.Modules.Meetings.Infrastructure
         public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
         public DbSet<InternalCommand> InternalCommands { get; set; }
+
         public DbSet<Member> Members { get; set; }
+
+        public DbSet<MemberSubscription> MemberSubscriptions { get; set; }
+        
+        public DbSet<MeetingComment> MeetingComments { get; set; }
 
         private readonly ILoggerFactory _loggerFactory;
 
@@ -39,13 +47,6 @@ namespace CompanyName.MyMeetings.Modules.Meetings.Infrastructure
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.ApplyConfiguration(new MeetingGroupsEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new MeetingEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new InternalCommandEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new MeetingGroupProposalEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new MemberEntityTypeConfiguration());
-        }
+            => modelBuilder.ApplyConfigurationsFromAssembly(this.GetType().Assembly);
     }
 }

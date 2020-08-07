@@ -3,9 +3,12 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using CompanyName.MyMeetings.BuildingBlocks.Application.Emails;
 using CompanyName.MyMeetings.BuildingBlocks.Infrastructure.Emails;
 using CompanyName.MyMeetings.BuildingBlocks.Infrastructure.EventBus;
+using CompanyName.MyMeetings.BuildingBlocks.IntegrationTests.Probing;
 using CompanyName.MyMeetings.Modules.Payments.Application.Contracts;
+using CompanyName.MyMeetings.Modules.Payments.Domain.SeedWork;
 using CompanyName.MyMeetings.Modules.Payments.Infrastructure;
 using CompanyName.MyMeetings.Modules.Payments.Infrastructure.Configuration;
 using Dapper;
@@ -25,6 +28,8 @@ namespace CompanyName.MyMeetings.Modules.Payments.IntegrationTests.SeedWork
         protected IPaymentsModule PaymentsModule;
 
         protected IEmailSender EmailSender;
+
+        protected EmailsConfiguration EmailsConfiguration;
 
         protected EventsBusMock EventsBus;
 
@@ -50,6 +55,7 @@ namespace CompanyName.MyMeetings.Modules.Payments.IntegrationTests.SeedWork
 
             Logger = Substitute.For<ILogger>();
             EmailSender = Substitute.For<IEmailSender>();
+            EmailsConfiguration = new EmailsConfiguration("from@email.com");
             EventsBus = new EventsBusMock();
             ExecutionContext = new ExecutionContextMock(Guid.NewGuid());
             
@@ -57,8 +63,9 @@ namespace CompanyName.MyMeetings.Modules.Payments.IntegrationTests.SeedWork
                 ConnectionString,
                 ExecutionContext,
                 Logger,
+                EmailsConfiguration,
                 EventsBus,
-                false);
+                true);
 
             PaymentsModule = new PaymentsModule();
         }
@@ -68,9 +75,15 @@ namespace CompanyName.MyMeetings.Modules.Payments.IntegrationTests.SeedWork
             const string sql = "DELETE FROM [payments].[InboxMessages] " +
                                "DELETE FROM [payments].[InternalCommands] " +
                                "DELETE FROM [payments].[OutboxMessages] " +
-                               "DELETE FROM [payments].[MeetingPayments] " +
-                               "DELETE FROM [payments].[MeetingGroupPayments] " +
-                               "DELETE FROM [payments].[MeetingGroupPaymentRegisters] " +
+                               "DELETE FROM payments.Messages " +
+                               "DBCC CHECKIDENT ('payments.Messages', RESEED, 0); " +
+                               "DELETE FROM payments.Streams " +
+                               "DBCC CHECKIDENT ('payments.Streams', RESEED, 0); " +
+                               "DELETE FROM payments.SubscriptionDetails " +
+                               "DELETE FROM [payments].[SubscriptionCheckpoints] " +
+                               "DELETE FROM [payments].PriceListItems " +
+                               "DELETE FROM [payments].SubscriptionPayments " +
+                               "DELETE FROM [payments].MeetingFees " +
                                "DELETE FROM [payments].[Payers] ";
 
             await connection.ExecuteScalarAsync(sql);
@@ -84,6 +97,25 @@ namespace CompanyName.MyMeetings.Modules.Payments.IntegrationTests.SeedWork
 
                 return OutboxMessagesHelper.Deserialize<T>(messages.Last());
             }
+        }
+
+        protected static void AssertEventually(IProbe probe, int timeout)
+        {
+            new Poller(timeout).Check(probe);
+        }
+
+        public static async Task<T> GetEventually<T>(IProbe<T> probe, int timeout) where  T: class
+        {
+            var poller = new Poller(timeout);
+
+            return await poller.GetAsync(probe);
+        }
+
+        [TearDown]
+        public void AfterEachTest()
+        {
+            PaymentsStartup.Stop();
+            SystemClock.Reset();
         }
     }
 }

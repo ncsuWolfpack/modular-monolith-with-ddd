@@ -17,7 +17,7 @@ namespace CompanyName.MyMeetings.Modules.Administration.Infrastructure.Configura
 
             var schedulerConfiguration = new NameValueCollection();
             schedulerConfiguration.Add("quartz.scheduler.instanceName", "Administration");
-            
+
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory(schedulerConfiguration);
             IScheduler scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
 
@@ -30,7 +30,7 @@ namespace CompanyName.MyMeetings.Modules.Administration.Infrastructure.Configura
                 TriggerBuilder
                     .Create()
                     .StartNow()
-                    .WithCronSchedule("0/15 * * ? * *")
+                    .WithCronSchedule("0/2 * * ? * *")
                     .Build();
 
             scheduler
@@ -42,7 +42,7 @@ namespace CompanyName.MyMeetings.Modules.Administration.Infrastructure.Configura
                 TriggerBuilder
                     .Create()
                     .StartNow()
-                    .WithCronSchedule("0/15 * * ? * *")
+                    .WithCronSchedule("0/2 * * ? * *")
                     .Build();
 
             scheduler
@@ -54,7 +54,7 @@ namespace CompanyName.MyMeetings.Modules.Administration.Infrastructure.Configura
                 TriggerBuilder
                     .Create()
                     .StartNow()
-                    .WithCronSchedule("0/15 * * ? * *")
+                    .WithCronSchedule("0/2 * * ? * *")
                     .Build();
             scheduler.ScheduleJob(processInternalCommandsJob, triggerCommandsProcessing).GetAwaiter().GetResult();
 

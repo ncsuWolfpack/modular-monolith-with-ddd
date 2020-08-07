@@ -3,6 +3,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using CompanyName.MyMeetings.BuildingBlocks.Application.Emails;
+using CompanyName.MyMeetings.BuildingBlocks.Domain;
 using CompanyName.MyMeetings.BuildingBlocks.Infrastructure.Emails;
 using CompanyName.MyMeetings.Modules.Administration.Application.Contracts;
 using CompanyName.MyMeetings.Modules.Administration.Infrastructure;
@@ -52,7 +54,8 @@ namespace CompanyName.MyMeetings.Modules.Administration.IntegrationTests.SeedWor
             AdministrationStartup.Initialize(
                 ConnectionString,
                 ExecutionContext,
-                Logger);
+                Logger,
+                null);
 
             AdministrationModule = new AdministrationModule();
         }
@@ -75,6 +78,16 @@ namespace CompanyName.MyMeetings.Modules.Administration.IntegrationTests.SeedWor
                 var messages = await OutboxMessagesHelper.GetOutboxMessages(connection);
 
                 return OutboxMessagesHelper.Deserialize<T>(messages.Last());
+            }
+        }
+
+        protected static void AssertBrokenRule<TRule>(AsyncTestDelegate testDelegate) where TRule : class, IBusinessRule
+        {
+            var message = $"Expected {typeof(TRule).Name} broken rule";
+            var businessRuleValidationException = Assert.CatchAsync<BusinessRuleValidationException>(testDelegate, message);
+            if (businessRuleValidationException != null)
+            {
+                Assert.That(businessRuleValidationException.BrokenRule, Is.TypeOf<TRule>(), message);
             }
         }
     }

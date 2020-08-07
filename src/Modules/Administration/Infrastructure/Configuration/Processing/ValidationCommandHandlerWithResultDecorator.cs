@@ -10,7 +10,8 @@ using FluentValidation;
 
 namespace CompanyName.MyMeetings.Modules.Administration.Infrastructure.Configuration.Processing
 {
-    internal class ValidationCommandHandlerWithResultDecorator<T, TResult> : ICommandHandler<T, TResult> where T : ICommand<TResult>
+    internal class ValidationCommandHandlerWithResultDecorator<T, TResult> : ICommandHandler<T, TResult>
+        where T : ICommand<TResult>
     {
         private readonly IList<IValidator<T>> _validators;
         private readonly ICommandHandler<T, TResult> _decorated;
@@ -33,16 +34,7 @@ namespace CompanyName.MyMeetings.Modules.Administration.Infrastructure.Configura
 
             if (errors.Any())
             {
-                var errorBuilder = new StringBuilder();
-
-                errorBuilder.AppendLine("Invalid command, reason: ");
-
-                foreach (var error in errors)
-                {
-                    errorBuilder.AppendLine(error.ErrorMessage);
-                }
-
-                throw new InvalidCommandException(errorBuilder.ToString(), null);
+                throw new InvalidCommandException(errors.Select(x => x.ErrorMessage).ToList());
             }
 
             return _decorated.Handle(command, cancellationToken);

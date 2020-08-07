@@ -2,6 +2,7 @@
 {
     public class MeetingsPermissions
     {
+        public const string GetMeetingGroupProposals = "GetMeetingGroupProposals";
         public const string ProposeMeetingGroup = "ProposeMeetingGroup";
         public const string CreateNewMeeting = "CreateNewMeeting";
         public const string EditMeeting = "EditMeeting";
@@ -18,5 +19,7 @@
         public const string EditMeetingGroupGeneralAttributes = "EditMeetingGroupGeneralAttributes";
         public const string JoinToGroup = "JoinToGroup";
         public const string LeaveMeetingGroup = "LeaveMeetingGroup";
+        public const string AddMeetingComment = "AddMeetingComment";
+        public const string EditMeetingComment = "EditMeetingComment";
     }
 }

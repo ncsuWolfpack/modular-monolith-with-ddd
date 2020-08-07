@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.MeetingGroupProposals;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.MeetingGroups;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.Meetings;
@@ -21,6 +22,8 @@ namespace CompanyName.MyMeetings.Modules.Meetings.Domain.UnitTests.Meetings
             internal int GuestsLimit{ get; set; }
 
             internal int? AttendeesLimit { get; set; }
+            
+            internal IEnumerable<MemberId> Attendees { get; set; } = Enumerable.Empty<MemberId>();
         }
 
         protected class MeetingTestData
@@ -47,7 +50,7 @@ namespace CompanyName.MyMeetings.Modules.Meetings.Domain.UnitTests.Meetings
 
             var meetingGroup = meetingProposal.CreateMeetingGroup();
 
-            meetingGroup.UpdatePaymentInfo(DateTime.Now.AddDays(1));
+            meetingGroup.SetExpirationDate(DateTime.Now.AddDays(1));
 
             var meetingTerm = options.MeetingTerm ??
                               MeetingTerm.CreateNewBetweenDates(DateTime.UtcNow.AddDays(1), DateTime.UtcNow.AddDays(2));
@@ -63,6 +66,12 @@ namespace CompanyName.MyMeetings.Modules.Meetings.Domain.UnitTests.Meetings
                 MoneyValue.Undefined,
                 new List<MemberId>(),
                 proposalMemberId);
+
+            foreach (var attendee in options.Attendees)
+            {
+                meetingGroup.JoinToGroupMember(attendee);
+                meeting.AddAttendee(meetingGroup, attendee, 0);
+            }
 
             DomainEventsTestHelper.ClearAllDomainEvents(meetingGroup);
 

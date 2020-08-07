@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CompanyName.MyMeetings.BuildingBlocks.Domain;
+using CompanyName.MyMeetings.Modules.Meetings.Domain.MeetingComments;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.MeetingGroups;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.Meetings.Events;
 using CompanyName.MyMeetings.Modules.Meetings.Domain.Meetings.Rules;
@@ -287,6 +288,21 @@ namespace CompanyName.MyMeetings.Modules.Meetings.Domain.Meetings
             var attendee = this.GetActiveAttendee(attendeeId);
 
             attendee.Remove(removingPersonId, reason);
+        }
+        
+        
+        public void MarkAttendeeFeeAsPayed(MemberId memberId)
+        {
+            var attendee = GetActiveAttendee(memberId);
+
+            attendee.MarkFeeAsPayed();
+        }
+
+        public MeetingComment AddComment(MemberId authorId, string comment)
+        {
+            this.CheckRule(new CommentCanBeAddedOnlyByAttendeeRule(authorId, _attendees));
+                
+            return MeetingComment.Create(this.Id, authorId, comment);
         }
 
         private MeetingWaitlistMember GetActiveMemberOnWaitlist(MemberId memberId)
